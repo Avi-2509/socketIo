@@ -37,6 +37,7 @@ public class SocketComponent {
     private DataListener<MessageDto> onMessageReceived() {
         return (senderClient, data, ackSender) -> {
             MessageBo messageBo = MessageBoDtoMapper.INSTANCE.dtoToBo(data);
+            log.info("headers {}", senderClient.getHandshakeData().getHttpHeaders());
             log.info("sending data {}", AppUtil.toJson(messageBo));
             socketService.send(senderClient, data.getRoom(), "getMessage", messageBo);
         };
@@ -46,6 +47,7 @@ public class SocketComponent {
     private ConnectListener onConnected() {
         return (client) -> {
             String room = client.getHandshakeData().getSingleUrlParam("room");
+            client.getHandshakeData().getHttpHeaders().set("room", "123, room, room1");
             client.joinRoom(room);
             log.info("Socket ID[{}]  Connected to socket", client.getSessionId().toString());
         };
