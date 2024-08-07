@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Configuration monitorInterval="60">
+
+    <Properties>
+        <Property name="log-path">/tmp/homepage/logs</Property>
+    </Properties>
+
+    <Appenders>
+        <RollingRandomAccessFile name="LogFile"
+                                 fileName="${log-path}/application.log"
+                                 filePattern="${log-path}/application-%d{yyyy-MM-dd}-%i.log.gz" immediateFlush="false">
+            <PatternLayout>
+                <pattern>
+                    [%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} %X{requestLogId} %X{requestCustomerId} %X{traceId} %X{spanId} - %msg %n
+                </pattern>
+            </PatternLayout>
+
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+
+            <DefaultRolloverStrategy max="50">
+                <Delete basePath="${log-path}" maxDepth="2">
+                    <IfFileName glob="*/application-*.log.gz">
+                        <IfLastModified age="2d">
+                            <IfAccumulatedFileCount exceeds="50"/>
+                        </IfLastModified>
+                    </IfFileName>
+                </Delete>
+            </DefaultRolloverStrategy>
+
+        </RollingRandomAccessFile>
+
+        <RollingRandomAccessFile name="LogFileJson"
+                                 fileName="${log-path}/application-json.log"
+                                 filePattern="${log-path}/application-json-%d{yyyy-MM-dd}-%i.log.gz" immediateFlush="false">
+
+            <JsonTemplateLayout eventTemplateUri="classpath:EcsLayout.json"/>
+
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+
+            <DefaultRolloverStrategy max="50">
+                <Delete basePath="${log-path}" maxDepth="2">
+                    <IfFileName glob="*/application-*.log.gz">
+                        <IfLastModified age="2d">
+                            <IfAccumulatedFileCount exceeds="50"/>
+                        </IfLastModified>
+                    </IfFileName>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingRandomAccessFile>
+
+    </Appenders>
+
+    <Loggers>
+
+        <AsyncLogger name="com.personal" level="all" additivity="false">
+            <appender-ref ref="LogFile"/>
+            <appender-ref ref="LogFileJson"/>
+        </AsyncLogger>
+
+        <Root level="info">
+            <appender-ref ref="LogFile"/>
+            <appender-ref ref="LogFileJson"/>
+        </Root>
+
+    </Loggers>
+
+</Configuration>
